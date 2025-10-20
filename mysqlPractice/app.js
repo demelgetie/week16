@@ -1,114 +1,219 @@
-// Import the MySQL module
+// ✅ Import required modules
 const mysql = require("mysql");
 const express = require("express");
 const cors = require("cors");
+
+// ✅ Initialize Express app
 const app = express();
 
-// Middleware (runs for all routes)
-app.use(express.json()); // parse JSON request bodies
+// ✅ Middleware for CORS and parsing
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Create a connection object
-const connection = mysql.createConnection({
-  host: "localhost", // your MySQL host
-  user: "myDBuser", // username you created
-  password: "123456", // password you created
-  database: "myDB", // database name
+// ✅ Create MySQL connection
+const db = mysql.createConnection({
+  host: "127.0.0.1", // localhost or your DB host
+  user: "myDBuser", // database user
+  password: "123456", // database password
+  database: "myDB", // your database name
+  port: 3306, // MySQL default port
 });
 
-// Connect to the MySQL server
-connection.connect((err) => {
+// ✅ Connect to MySQL database
+db.connect((err) => {
   if (err) {
-    console.error(" Connection failed:", err.message);
+    console.error(" Database connection failed:", err);
   } else {
-    console.log(
-      'Successfully connected to MySQL database "myDB" as user "myDBuser"'
-    );
+    console.log(" Connected to MySQL database: myDB");
   }
 });
 
+// ------------------------------------------------------
+//  ROUTE 1: Create all tables (/install)
+// ------------------------------------------------------
 app.get("/install", (req, res) => {
-  // 1. Create Users table first
-  const users = `
-    CREATE TABLE IF NOT EXISTS Users (
-      user_id INT(11) AUTO_INCREMENT,
-      User_name VARCHAR(50) NOT NULL,
-      User_password VARCHAR(100) NOT NULL,
+  // --- Create Products table ---
+  const createProducts = `
+    CREATE TABLE IF NOT EXISTS ProductTable (
+      product_id INT AUTO_INCREMENT,
+      product_url VARCHAR(255) NOT NULL,
+      product_name VARCHAR(255) NOT NULL,
+      PRIMARY KEY (product_id)
+    ) ENGINE=InnoDB;
+  `;
+
+  // --- Create Product Description table ---
+  const createProDescription = `
+    CREATE TABLE IF NOT EXISTS ProDescription (
+      description_id INT AUTO_INCREMENT,
+      product_id INT NOT NULL,
+      product_brif_description TEXT NOT NULL,
+      product_description TEXT NOT NULL,
+      product_img VARCHAR(255) NOT NULL,
+      product_link VARCHAR(255) NOT NULL,
+      PRIMARY KEY (description_id),
+      FOREIGN KEY (product_id) REFERENCES ProductTable(product_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB;
+  `;
+
+  // --- Create Product Price table ---
+  const createProPrice = `
+    CREATE TABLE IF NOT EXISTS ProductPrice (
+      price_id INT AUTO_INCREMENT,
+      product_id INT NOT NULL,
+      starting_price VARCHAR(255) NOT NULL,
+      price_range VARCHAR(255) NOT NULL,
+      PRIMARY KEY (price_id),
+      FOREIGN KEY (product_id) REFERENCES ProductTable(product_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB;
+  `;
+
+  // --- Create User table ---
+  const createUser = `
+    CREATE TABLE IF NOT EXISTS UserTable (
+      user_id INT AUTO_INCREMENT,
+      user_name VARCHAR(255) NOT NULL,
+      user_password VARCHAR(255) NOT NULL,
       PRIMARY KEY (user_id)
     ) ENGINE=InnoDB;
   `;
 
-  // 2. Create Products table
-  const products = `
-    CREATE TABLE IF NOT EXISTS Products (
-      Product_id INT(11) AUTO_INCREMENT,
-      product_url VARCHAR(255) NOT NULL,
-      product_name VARCHAR(100) NOT NULL,
-      PRIMARY KEY (Product_id)
+  // --- Create Orders table ---
+  const createOrder = `
+    CREATE TABLE IF NOT EXISTS OrderTable (
+      order_id INT AUTO_INCREMENT,
+      product_id INT NOT NULL,
+      user_id INT NOT NULL,
+      PRIMARY KEY (order_id),
+      FOREIGN KEY (product_id) REFERENCES ProductTable(product_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES UserTable(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB;
   `;
 
-  // 3. Create Product_Description table
-  const description = `
-    CREATE TABLE IF NOT EXISTS Product_Description (
-      Description_id INT AUTO_INCREMENT,
-      Product_id INT(11) NOT NULL,
-      Product_brief_description VARCHAR(255) NOT NULL,
-      Product_img VARCHAR(255) NOT NULL,
-      Product_link VARCHAR(255) NOT NULL,
-      PRIMARY KEY (Description_id),
-      FOREIGN KEY (Product_id) REFERENCES Products(Product_id)
-    ) ENGINE=InnoDB;
-  `;
-
-  // 4. Create Product_Price table
-  const price = `
-    CREATE TABLE IF NOT EXISTS Product_Price (
-      Price_id INT AUTO_INCREMENT PRIMARY KEY,
-      Product_id INT(11),
-      Starting_price VARCHAR(50) NOT NULL,
-      Price_range VARCHAR(100) NOT NULL,
-      FOREIGN KEY (Product_id) REFERENCES Products(Product_id)
-    ) ENGINE=InnoDB;
-  `;
-
-  // 5. Create Orders table
-  const orders = `
-    CREATE TABLE IF NOT EXISTS Orders (
-      order_id INT AUTO_INCREMENT PRIMARY KEY,
-      Product_id INT,
-      user_id INT,
-      FOREIGN KEY (user_id) REFERENCES Users(user_id),
-      FOREIGN KEY (Product_id) REFERENCES Products(Product_id)
-    ) ENGINE=InnoDB;
-  `;
-
-  // Execute queries in proper order
-  connection.query(users, (err) => {
-    if (err) console.log("Users table error:", err);
+  // Execute all table creation queries sequentially
+  db.query(createProducts, (err) => {
+    if (err) console.error(" ProductTable error:", err);
   });
 
-  connection.query(products, (err) => {
-    if (err) console.log("Products table error:", err);
+  db.query(createProDescription, (err) => {
+    if (err) console.error(" ProDescription error:", err);
   });
 
-  connection.query(description, (err) => {
-    if (err) console.log("Description table error:", err);
+  db.query(createProPrice, (err) => {
+    if (err) console.error(" ProductPrice error:", err);
   });
 
-  connection.query(price, (err) => {
-    if (err) console.log("Price table error:", err);
+  db.query(createUser, (err) => {
+    if (err) console.error(" UserTable error:", err);
   });
 
-  connection.query(orders, (err) => {
-    if (err) console.log("Orders table error:", err);
+  db.query(createOrder, (err) => {
+    if (err) console.error(" OrderTable error:", err);
   });
 
   res.send("✅ All tables created successfully!");
 });
 
+// ------------------------------------------------------
+//  ROUTE 2: Insert a new product and related data
+// ------------------------------------------------------
+app.post("/add-product", (req, res) => {
+  const {
+    product_name,
+    product_url,
+    product_brif_description,
+    product_description,
+    product_img,
+    product_link,
+    starting_price,
+    price_range,
+    user_name,
+    user_password,
+  } = req.body;
 
-const PORT = 3000;
+  // --- Step 1: Insert product into ProductTable ---
+  const insertProduct = `
+    INSERT INTO ProductTable (product_url, product_name)
+    VALUES (?, ?)
+  `;
+  db.query(insertProduct, [product_url, product_name], (err, productResult) => {
+    if (err) {
+      console.error(" Product insert error:", err);
+      return res.status(500).send("Error inserting product");
+    }
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+    const productId = productResult.insertId; // get product_id
+
+    // --- Step 2: Insert product details ---
+    const insertDescription = `
+      INSERT INTO ProDescription (product_id, product_brif_description, product_description, product_img, product_link)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    db.query(
+      insertDescription,
+      [
+        productId,
+        product_brif_description,
+        product_description,
+        product_img,
+        product_link,
+      ],
+      (err) => {
+        if (err) console.error(" Description insert error:", err);
+      }
+    );
+
+    // --- Step 3: Insert price info ---
+    const insertPrice = `
+      INSERT INTO ProductPrice (product_id, starting_price, price_range)
+      VALUES (?, ?, ?)
+    `;
+    db.query(insertPrice, [productId, starting_price, price_range], (err) => {
+      if (err) console.error(" Price insert error:", err);
+    });
+
+    // --- Step 4: Insert user ---
+    const insertUser = `
+      INSERT INTO UserTable (user_name, user_password)
+      VALUES (?, ?)
+    `;
+    db.query(insertUser, [user_name, user_password], (err, userResult) => {
+      if (err) {
+        console.error(" User insert error:", err);
+        return res.status(500).send("Error inserting user");
+      }
+
+      const userId = userResult.insertId; // get user_id
+
+      // --- Step 5: Insert into Order table ---
+      const insertOrder = `
+        INSERT INTO OrderTable (product_id, user_id)
+        VALUES (?, ?)
+      `;
+      db.query(insertOrder, [productId, userId], (err) => {
+        if (err) {
+          console.error(" Order insert error:", err);
+          return res.status(500).send("Error inserting order");
+        }
+
+        //  Success response
+        res.send(
+          " Product, Description, Price, User, and Order added successfully!"
+        );
+      });
+    });
+  });
 });
+
+// ------------------------------------------------------
+//  Start the Express server
+// ------------------------------------------------------
+const PORT = 3001;
+app.listen(PORT, () =>
+  console.log(` Server running on http://localhost:${PORT}`)
+);
