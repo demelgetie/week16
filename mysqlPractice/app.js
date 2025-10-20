@@ -10,7 +10,6 @@ const connection = mysql.createConnection({
   user: "myDBuser", // username you created
   password: "123456", // password you created
   database: "myDB", // database name
-  
 });
 
 // Connect to the MySQL server
