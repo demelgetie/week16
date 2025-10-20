@@ -3,13 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MySQL practice</title>
-    <link rel="stylesheet" href="./style.css" />
+    <title>MySQL Form - Add iPhone</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>This is my first MySQL DataBase</h1>
+    <div class="container">
+      <h1>Add iPhone</h1>
+      <form
+        action="http://localhost:3001/add-product"
+        method="post"
+        class="form"
+      >
+        <!-- Product Info -->
+        <div class="form-section">
+          <h2>Products Table</h2>
+          <label>Product URL</label>
+          <input type="text" name="product_url" required />
 
-    <script src="./script.js"></script>
-    <script src="./app.js"></script>
+          <label>Product Name</label>
+          <input type="text" name="product_name" required />
+        </div>
+
+        <!-- Product Description -->
+        <div class="form-section">
+          <h2>Product Description</h2>
+          <label>Brief Description</label>
+          <textarea name="product_brief_description" rows="4"></textarea>
+
+          <label>Full Description</label>
+          <textarea name="product_description" rows="4"></textarea>
+
+          <label>Image URL</label>
+          <input type="text" name="product_img" />
+
+          <label>Product Link</label>
+          <input type="text" name="product_link" />
+        </div>
+
+        <!-- Product Price -->
+        <div class="form-section">
+          <h2>Product Price</h2>
+          <label>Starting Price</label>
+          <input type="text" name="starting_price" />
+
+          <label>Price Range</label>
+          <input type="text" name="price_range" />
+        </div>
+
+        <!-- User Info -->
+        <div class="form-section">
+          <h2>User Info</h2>
+          <label>User Name</label>
+          <input type="text" name="user_name" required />
+
+          <label>User Password</label>
+          <input type="password" name="user_password" required />
+        </div>
+
+        <div class="submit-btn">
+          <input type="submit" value="Add Product" />
+        </div>
+      </form>
+    </div>
   </body>
 </html>
