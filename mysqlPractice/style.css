@@ -1,9 +1,118 @@
+/* === Reset some browser defaults === */
 * {
-  padding: 0%;
-  margin: 0px;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* body {
-  background-color: green;
-} */
+/* === Page background and layout === */
+body {
+  background: linear-gradient(135deg, #0078ff, #00c6ff);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* === Main container === */
+.container {
+  background: #fff;
+  width: 100%;
+  max-width: 800px;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.6s ease;
+}
+
+.container h1 {
+  text-align: center;
+  color: #0078ff;
+  margin-bottom: 25px;
+}
+
+/* === Section styling === */
+.form-section {
+  margin-bottom: 25px;
+  border-left: 4px solid #0078ff;
+  padding-left: 15px;
+}
+
+.form-section h2 {
+  color: #444;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+/* === Input & textarea styling === */
+label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #0078ff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 120, 255, 0.3);
+}
+
+/* === Submit button === */
+.submit-btn {
+  text-align: center;
+  margin-top: 20px;
+}
+
+input[type="submit"] {
+  background: #0078ff;
+  color: white;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+input[type="submit"]:hover {
+  background: #005fcc;
+}
+
+/* === Animation === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Responsive design === */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+  }
+
+  .form-section h2 {
+    font-size: 18px;
+  }
+}
