@@ -151,12 +151,15 @@ app.post("/add-product", (req, res) => {
       }
 
       const productId = productResult.insertId; // get product_id
+      console.log(productId);
 
       // --- Step 2: Insert product details ---
       const insertDescription = `
-      INSERT INTO ProDescription (product_id, product_brif_description, product_description, product_img, product_link)
+      INSERT INTO ProDescription (product_id, product_brif_description, product_description, product_img,
+  product_link)
       VALUES (?, ?, ?, ?, ?)
     `;
+
       connection.query(
         insertDescription,
         [
