@@ -150,8 +150,8 @@ app.post("/add-product", (req, res) => {
         return res.status(500).send("Error inserting product");
       }
 
-      const productId = productResult.insertId; // get product_id
-      console.log(productId);
+      const productId = productResult.insertId; // get product_id 1 , 2 , 3 
+      // console.log(productId);
 
       // --- Step 2: Insert product details ---
       const insertDescription = `
@@ -221,6 +221,25 @@ app.post("/add-product", (req, res) => {
           });
         }
       );
+    }
+  );
+});
+
+// Route to get all iPhones with their descriptions and prices
+app.get("/iphones", (req, res) => {
+  // SQL query to join Products, ProductDescriptions, and ProductPrices tables
+  connection.query(
+    `SELECT * FROM Producttable
+     INNER JOIN Prodescription ON Producttable.product_id = ProDescription.product_id
+     INNER JOIN ProductPrice ON Producttable.product_id = ProductPrice.product_id`,
+    (err, rows) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Database error");
+        return;
+      }
+      // Send the joined data as JSON response
+      res.json(rows);
     }
   );
 });
